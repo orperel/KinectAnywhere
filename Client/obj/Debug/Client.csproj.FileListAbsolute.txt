@@ -1,0 +1,40 @@
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\Client.csproj.GenerateResource.Cache
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\bin\Debug\Kinect-Client.exe.config
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\bin\Debug\Kinect-Client.exe
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\bin\Debug\Kinect-Client.pdb
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\Kinect-Client_MarkupCompile.cache
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\Kinect-Client.g.resources
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\Kinect-Client.exe
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\Kinect-Client.pdb
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonClient.Properties.Resources.resources
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\bin\Debug\Kinect-Client.exe.config
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\bin\Debug\Kinect-Client.exe
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\bin\Debug\Kinect-Client.pdb
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\MainWindow.baml
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\MainWindow.g.cs
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\App.g.cs
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Kinect-Client_MarkupCompile.cache
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Kinect-Client.g.resources
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Microsoft.Samples.Kinect.SkeletonClient.Properties.Resources.resources
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Client.csproj.GenerateResource.Cache
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Kinect-Client.exe
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Kinect-Client.pdb
+C:\Users\Amit\Documents\Visual Studio 2013\Projects\KinectAnywhere\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\MainWindow.baml
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\MainWindow.g.cs
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\App.g.cs
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Kinect-Client_MarkupCompile.cache
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Kinect-Client.g.resources
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Microsoft.Samples.Kinect.SkeletonClient.Properties.Resources.resources
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Client.csproj.GenerateResource.Cache
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Kinect-Client.exe
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\obj\Debug\Kinect-Client.pdb
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\bin\Debug\Kinect-Client.exe.config
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\bin\Debug\Kinect-Client.exe
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\bin\Debug\Kinect-Client.pdb
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\bin\Debug\Microsoft.Kinect.dll
+C:\Users\Or Perel\Documents\Code\KinectAnywhere\Client\bin\Debug\Microsoft.Kinect.xml
