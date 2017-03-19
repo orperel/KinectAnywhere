@@ -22,6 +22,8 @@ namespace KinectAnywhere
         /// </summary>
         public const float UNTRACKED_POSITION_VALUE = float.MinValue;
 
+        public static int numOfJoints = Enum.GetNames(typeof(JointType)).Length;
+
         /// <summary>
         /// Camera id that tracked the current skeleton.
         /// </summary>
@@ -54,7 +56,6 @@ namespace KinectAnywhere
             cameraId = aCameraId;
             skelId = aSkelId;
             frameOffset = aFrameOffset;
-            int numOfJoints = Enum.GetNames(typeof(JointType)).Length;
             joints = new SkeletonPoint[numOfJoints];
         }
 
@@ -66,6 +67,26 @@ namespace KinectAnywhere
         public void updateJoint(byte jointType, SkeletonPoint pos)
         {
             joints[jointType] = pos;
+        }
+
+        /// <summary>
+        /// Converts the skeleton joints data to a flat floats array format.
+        /// </summary>
+        /// <returns> The joints data in a format of [x,y,z,x,y,z,...] float 1d array of floats </returns>
+        public float[] toArray()
+        {
+            float[] vals = new float[numOfJoints * 3];
+            int i = 0;
+
+            foreach (SkeletonPoint joint in joints)
+            {
+                vals[i] = joint.X;
+                vals[i + 1] = joint.Y;
+                vals[i + 2] = joint.Z;
+                i += 3;
+            }
+
+            return vals;
         }
     }
 }

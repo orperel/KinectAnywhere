@@ -9,6 +9,7 @@ namespace KinectAnywhere
     class Matrix
     {
         public delegate float MatrixPerElementOperation(float x);
+        public delegate float MatrixPerElementProduct(float x, float y);
 
         public int rows { get; private set; }
         public int cols { get; private set; }
@@ -39,6 +40,25 @@ namespace KinectAnywhere
                 _mat[i, 1] = vals[i];
         }
 
+        public static Matrix identity(int rows, int cols)
+        {
+            Matrix idenMat = new Matrix(rows, cols);
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j <= cols; j++)
+                {
+                    idenMat[i, j] = (i == j) ? 1 : 0;
+                }
+            }
+
+            return idenMat;
+        }
+
+        /// <summary>
+        /// Creates a column vector of size (Length(vals), 1), initialized with vals' values.
+        /// </summary>
+        /// <param name="vals"> Initialization values for the vector </param>
         public void init(float[] vals)
         {
             if ((cols != 1) || (vals.Length != rows))
@@ -125,6 +145,39 @@ namespace KinectAnywhere
             return result;
         }
 
+        public Matrix mul(float x)
+        {
+            Matrix result = new Matrix(rows, cols);
+
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    result[i, j] = this[i, j] * x;
+                }
+            }
+
+            return result;
+        }
+
+        public Matrix dot(Matrix m2)
+        {
+            if ((cols != m2.cols) || (rows != m2.rows))
+                throw new InvalidOperationException("Trying to calc dot product for matrices with non-matching dimensions");
+
+            Matrix result = new Matrix(rows, cols);
+
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    result[i, j] = this[i, j] * m2[i, j];
+                }
+            }
+
+            return result;
+        }
+
         public Matrix invoke(MatrixPerElementOperation oper)
         {
             Matrix result = new Matrix(rows, cols);
@@ -138,6 +191,30 @@ namespace KinectAnywhere
             }
 
             return result;
+        }
+
+        public Matrix invoke(MatrixPerElementProduct oper, Matrix m2)
+        {
+            if ((cols != m2.cols) || (rows != m2.rows))
+                throw new InvalidOperationException("Trying to invoke element-wise operation on matrices" +
+                                                    "with non-matching dimensions");
+
+            Matrix result = new Matrix(rows, cols);
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    result[i, j] = oper.Invoke(_mat[i, j], m2[i, j]);
+                }
+            }
+
+            return result;
+        }
+
+        public static Matrix invoke(MatrixPerElementProduct oper, Matrix m1, Matrix m2)
+        {
+            return m1.invoke(oper, m2);
         }
 
         public static Matrix operator +(Matrix a, Matrix b)
@@ -155,6 +232,11 @@ namespace KinectAnywhere
             return a.mul(b);
         }
 
+        public static Matrix operator *(Matrix a, float x)
+        {
+            return a.mul(x);
+        }
+
         public float this[int i, int j]
         {
             get
@@ -165,11 +247,6 @@ namespace KinectAnywhere
             {
                 _mat[i, j] = value;
             }
-        }
-
-        public float[] toArray()
-        {
-
         }
     }
 }
