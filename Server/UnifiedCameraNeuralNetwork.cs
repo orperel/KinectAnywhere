@@ -119,7 +119,7 @@ namespace KinectAnywhere
             Matrix outputDelta = outputError * prediction.invoke(_nonLinearityFuncDeriv); ; // Multiply error by weighted prediction
 
             Matrix hiddenError = outputDelta * (_hiddenLayerWeights.transpose());
-            Matrix hiddenDelta = hiddenError * (hiddenLayerVals.invoke(_nonLinearityFuncDeriv); // Multiply error by weighted prediction
+            Matrix hiddenDelta = hiddenError * (hiddenLayerVals.invoke(_nonLinearityFuncDeriv)); // Multiply error by weighted prediction
 
             _outputLayerWeights += prediction * outputDelta;
             _hiddenLayerWeights += hiddenLayerVals * hiddenDelta;

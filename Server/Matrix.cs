@@ -167,9 +167,9 @@ namespace KinectAnywhere
             }
         }
 
-        public float[] toArray()
-        {
-
-        }
+        //public float[] toArray()
+        //{
+        //
+        //}
     }
 }
