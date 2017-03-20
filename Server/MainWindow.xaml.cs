@@ -16,21 +16,24 @@
     /// </summary>
     public partial class MainWindow : Window
     {
-        // TODO: add comments
+        // TODO: rmove
+        private DateTime SESSION_TIMESTAMP = DateTime.Parse("22:32:53.330");
+        private int numOfCameras = 1;
+        private Calibration calibration;
+        bool isRecord = false;
+
+        // TODO: add comments   
         UdpClient Client = new UdpClient(11000);
         IPEndPoint ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000); // endpoint where server is listening
 
         ConcurrentDictionary<string, List<Skeleton>> skeletons = new ConcurrentDictionary<string, List<Skeleton>>();
+        ConcurrentDictionary<string, int> cameras = new ConcurrentDictionary<string, int>();
 
         private SkelRecorder skelRec;
 
         private SkelDisplay skelDisp;
 
         private System.Windows.Forms.Timer timer1;
-
-        private SkelReplay skelRep;
-
-        private DateTime SESSION_TIMESTAMP = DateTime.Parse("13:21:58.238");
 
         //CallBack
         private void recv(System.IAsyncResult res)
@@ -41,19 +44,30 @@
 
             Stream ms = new MemoryStream(received);
             BinaryFormatter bf = new BinaryFormatter();
-            object obj = bf.Deserialize(ms);
+            object obj1 = bf.Deserialize(ms);
+            object obj2 = bf.Deserialize(ms);
 
-            List<Skeleton> skeletonList = (List<Skeleton>)obj;
+            List<Skeleton> skeletonList = (List<Skeleton>)obj1;
+            DateTime timestamp = (DateTime)obj2;
 
             var remoteIPString = RemoteIpEndPoint.Address.ToString();
 
-            skeletons[remoteIPString] = skeletonList;
+            bool isFirstConnectionForClient = !skeletons.ContainsKey(remoteIPString);
+
+            if (isFirstConnectionForClient)
+            {
+                skeletons[remoteIPString] = skeletonList;
+                int cameraId = cameras.Count; // Assign camera id for client by ip
+                cameras[remoteIPString] = cameraId;
+                this.skelRec.createFile(cameraId); 
+            }
 
             if (this.skelRec != null)
             {
                 foreach (Skeleton skel in skeletonList)
                 {
-                    this.skelRec.recordSkelFrame(skel, 0, DateTime.Now);
+                    int cameraId = cameras[remoteIPString];
+                    this.skelRec.recordSkelFrame(skel, cameraId, timestamp);
                 }
             }
 
@@ -66,17 +80,17 @@
         public MainWindow()
         {
             this.skelRec = new SkelRecorder();
-            this.skelRec.createFile(0);
 
             this.skelDisp = new SkelDisplay(null);
-
-            //this.skelRep = new SkelReplay(SESSION_TIMESTAMP, 1);
 
             InitializeComponent();
             
             try
             {
-                Client.BeginReceive(new AsyncCallback(recv), null);
+                if (isRecord)
+                    Client.BeginReceive(new AsyncCallback(recv), null);
+                else
+                    this.calibration = new Calibration(SESSION_TIMESTAMP, numOfCameras, this.skelDisp);
             }
             catch (Exception e)
             {
@@ -86,14 +100,22 @@
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            Dictionary<Skeleton, int> allSkeletons = new Dictionary<Skeleton, int>();
+
             foreach (KeyValuePair<string, List<Skeleton>> entry in this.skeletons)
             {
-                if (entry.Value.Count != 0)
-                    this.skelDisp.drawSkeletons(entry.Value);
+                foreach (Skeleton skel in entry.Value)
+                {
+                    allSkeletons.Add(skel, cameras[entry.Key]);
+                }
             }
 
-            //if (!this.skelRep.replaySessionFrame(this.skelDisp.drawSkeletons))
-            //    this.Close();
+            this.skelDisp.drawSkeletons(allSkeletons);
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            this.calibration.calibrate();
         }
 
         /// <summary>
@@ -105,11 +127,21 @@
         {            
             Image.Source = this.skelDisp.imageSource;
 
-            // Timer for showSkeletons
-            this.timer1 = new System.Windows.Forms.Timer();
-            this.timer1.Tick += new EventHandler(timer1_Tick);
-            this.timer1.Interval = 30; // Milliseconds (Kinect works with 30fps)
-            this.timer1.Start();
+            if (isRecord)
+            {
+                // Timer for showSkeletons
+                this.timer1 = new System.Windows.Forms.Timer();
+                this.timer1.Tick += new EventHandler(timer1_Tick);
+                this.timer1.Interval = 30; // Milliseconds (Kinect works with 30fps)
+                this.timer1.Start();
+            }
+            else {
+                // Timer for showSkeletons
+                this.timer1 = new System.Windows.Forms.Timer();
+                this.timer1.Tick += new EventHandler(timer2_Tick);
+                this.timer1.Interval = 16;
+                this.timer1.Start();
+            }
         }
 
         /// <summary>

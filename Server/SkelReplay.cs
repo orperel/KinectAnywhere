@@ -33,7 +33,7 @@ namespace KinectAnywhere
         /// A handler for handling each frame data (the skeleton information as captured by each camera).
         /// </summary>
         /// <param name="frameData"> The skeleton information as captured by each camera </param>
-        public delegate void ReplayFrameHandler(SkelJointsData[] frameData);
+        public delegate void ReplayFrameHandler(Dictionary<SkelJointsData, int> frameData);
 
         /// <summary>
         /// Reads and parses the next skeleton stored in the cameraFile.
@@ -154,7 +154,7 @@ namespace KinectAnywhere
             // Sync all cameras on the same frame
 
             int numOfCameras = _camRecordedFrames.Keys.Count;
-            SkelJointsData[] frameData = new SkelJointsData[numOfCameras];
+            Dictionary<SkelJointsData, int> frameData = new Dictionary<SkelJointsData, int>(numOfCameras);
             bool isSynced = true;
 
             uint minOffset = UInt32.MaxValue;
@@ -186,7 +186,7 @@ namespace KinectAnywhere
 
                     if (isInMinFrame)
                     { // Capture frame data for current camera and eliminate from recordings list
-                        frameData[cameraId] = camFrameInfo;
+                        frameData.Add(camFrameInfo, cameraId);
                         _camRecordedFrames[cameraId].RemoveFirst();
                     }
                 }

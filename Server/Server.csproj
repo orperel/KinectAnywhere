@@ -82,6 +82,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AnnTester.cs" />
+    <Compile Include="Calibration.cs" />
     <Compile Include="SkelDisplay.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="SkelJointsData.cs" />

@@ -17,6 +17,7 @@ namespace KinectAnywhere
     {
         private int _numOfCameras; // Number of cameras in the setup
         private SkelReplay _replay; // Replays the recording sessions of each camera
+        private SkelDisplay _display;
         private UnifiedCameraNeuralNetwork[] _neuralNets; // A network for each pair of camaras (main camera and camera i)
         
         /// <summary>
@@ -25,10 +26,11 @@ namespace KinectAnywhere
         /// </summary>
         /// <param name="sessionTimestamp"> Timestamp of the session recorded </param>
         /// <param name="numOfCameras"> Number of cameras in the recording </param>
-        public Calibration(DateTime sessionTimestamp, int numOfCameras)
+        public Calibration(DateTime sessionTimestamp, int numOfCameras, SkelDisplay display)
         {
             // Non configurable ANN parameters (each network maps a pair of cameras)
             // The input is one of the cameras, the output is the absolute camera.
+            _neuralNets = new UnifiedCameraNeuralNetwork[numOfCameras];
             int inputLayerSize = SkelJointsData.numOfJoints * 3;
             int outputLayerSize = inputLayerSize;
 
@@ -45,6 +47,7 @@ namespace KinectAnywhere
             }
 
             _numOfCameras = numOfCameras;
+            _display = display;
             _replay = new SkelReplay(sessionTimestamp, numOfCameras);
         }
 
@@ -57,13 +60,26 @@ namespace KinectAnywhere
             int keep_alive_message_delta = 300;
 
             // The loop will repeat as long as there are still frames recorded for the session
-            while (!_replay.replaySessionFrame(processFrame))
+            if (_replay.replaySessionFrame(processFrame))
             {
                 if (i % keep_alive_message_delta == 0)
                     Console.WriteLine("Calibration executing..");
             }
+            else
+            {
+                Console.WriteLine("Calibration process finished!");
+            }
+        }
 
-            Console.WriteLine("Calibration process finished!");
+        /// <summary>
+        /// This event is prompted for each frame replayed by the skelReplay object.
+        /// The frameData contains information for each of the cameras for the current frame.
+        /// </summary>
+        /// <param name="frameData"></param>
+        private void processFrame(Dictionary<SkelJointsData, int> frameData)
+        {
+            trainNetwork(frameData);
+            _display.drawSkeletons(frameData);
         }
 
         /// <summary>
@@ -71,15 +87,22 @@ namespace KinectAnywhere
         /// In response we train the ANN here using the replayed joints data.
         /// </summary>
         /// <param name="frameData"></param>
-        private void processFrame(SkelJointsData[] frameData)
+        private void trainNetwork(Dictionary<SkelJointsData, int> frameData)
         {
-            float[] cam0 = frameData[0].toArray(); // Data of the main camera
+            // TODO: Support more skeletons
+            SkelJointsData skel0Cam0 = frameData.FirstOrDefault(skel => skel.Value == 0).Key;
+            float[] cam0 = skel0Cam0.toArray(); // Data of the main camera
 
             // Train each ANN by feeding camera i's data and comparing it with cam0
-            for (int i = 1; i < _numOfCameras; i++)
+            foreach (KeyValuePair<SkelJointsData, int> entry in frameData)
             {
-                float[] cami = frameData[i].toArray();
-                _neuralNets[i - 1].train(cami, cam0);
+                int camId = entry.Value;
+
+                if (camId == 0)
+                    continue; // Skip main camera, we calibrate by this camera as absolute
+
+                float[] cami = entry.Key.toArray();
+                _neuralNets[camId - 1].train(cami, cam0);
             }
         }
 

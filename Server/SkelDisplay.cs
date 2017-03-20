@@ -18,12 +18,12 @@ namespace KinectAnywhere
         private const double BodyCenterThickness = 10;  // Thickness of body center ellipse
         private const double ClipBoundsThickness = 10;  // Thickness of clip edge rectangles       
         private readonly Brush centerPointBrush = Brushes.Blue; // Brush used to draw skeleton center point
-        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));   // Brush used for drawing joints that are currently tracked     
+        private readonly Brush trackedJointBrush = new SolidColorBrush(Brushes.DarkSalmon.Color);   // Brush used for drawing joints that are currently tracked     
         private readonly Brush inferredJointBrush = Brushes.Yellow; // Brush used for drawing joints that are currently inferred
-        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);    // Pen used for drawing bones that are currently tracked
+        private readonly List<Pen> trackedBonePens = new List<Pen>();    // Pen used for drawing bones that are currently tracked
         private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);    // Pen used for drawing bones that are currently inferred
         private DrawingGroup drawingGroup;  // Drawing group for skeleton rendering output
-        public DrawingImage imageSource;   // Drawing image that we will display
+        public DrawingImage imageSource { get; }    // Drawing image that we will display
 
         private CoordinateMapper coordinateMapper;  // Active coordinate mapper
 
@@ -47,6 +47,20 @@ namespace KinectAnywhere
                 byte[] coordMapperParams = File.ReadAllBytes("..\\..\\Coord_Mapper_Params.txt");
                 this.coordinateMapper = new CoordinateMapper(coordMapperParams);
             }
+
+            trackedBonePens.Add(new Pen(Brushes.Red, 6));
+            trackedBonePens.Add(new Pen(Brushes.Blue, 6));
+            trackedBonePens.Add(new Pen(Brushes.Green, 6));
+            trackedBonePens.Add(new Pen(Brushes.Yellow, 6));
+            trackedBonePens.Add(new Pen(Brushes.Orange, 6));
+            trackedBonePens.Add(new Pen(Brushes.Purple, 6));
+            trackedBonePens.Add(new Pen(Brushes.Cyan, 6));
+            trackedBonePens.Add(new Pen(Brushes.White, 6));
+            trackedBonePens.Add(new Pen(Brushes.Silver, 6));
+            trackedBonePens.Add(new Pen(Brushes.Gold, 6));
+            trackedBonePens.Add(new Pen(Brushes.DarkGoldenrod, 6));
+            trackedBonePens.Add(new Pen(Brushes.Brown, 6));
+            trackedBonePens.Add(new Pen(Brushes.MistyRose, 6));
         }
 
         /// <summary>
@@ -76,12 +90,13 @@ namespace KinectAnywhere
         /// <param name="drawingContext">drawing context to draw to</param>
         /// <param name="jointType0">joint to start drawing from</param>
         /// <param name="jointType1">joint to end drawing at</param>
-        private void DrawBone(Joint[] joints, DrawingContext drawingContext, JointType jointType0, JointType jointType1, Boolean skelPointsOnly = false)
+        private void DrawBone(Joint[] joints, DrawingContext drawingContext, Pen trackedBonePen,
+                              JointType jointType0, JointType jointType1, Boolean skelPointsOnly = false)
         {
             Joint joint0 = joints[(int)jointType0];
             Joint joint1 = joints[(int)jointType1];
 
-            Pen drawPen = this.inferredBonePen;
+            Pen drawPen = trackedBonePen;
 
             if (!skelPointsOnly)
             {
@@ -95,7 +110,7 @@ namespace KinectAnywhere
 
                 // We assume all drawn bones are inferred unless BOTH joints are tracked
                 if (joint0.TrackingState == JointTrackingState.Tracked && joint1.TrackingState == JointTrackingState.Tracked)
-                    drawPen = this.trackedBonePen;
+                    drawPen = trackedBonePen;
             }
 
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
@@ -119,36 +134,36 @@ namespace KinectAnywhere
         /// </summary>
         /// <param name="skeleton">skeleton to draw</param>
         /// <param name="drawingContext">drawing context to draw to</param>
-        private void DrawBonesAndJoints(Joint[] joints, DrawingContext drawingContext, Boolean skelPointsOnly = false)
+        private void DrawBonesAndJoints(Joint[] joints, DrawingContext drawingContext, Pen trackedBonePen, Boolean skelPointsOnly = false)
         {
             // Render Torso
-            this.DrawBone(joints, drawingContext, JointType.Head, JointType.ShoulderCenter, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.ShoulderCenter, JointType.Spine, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.Spine, JointType.HipCenter, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.HipCenter, JointType.HipLeft, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.HipCenter, JointType.HipRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.Head, JointType.ShoulderCenter, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ShoulderCenter, JointType.ShoulderLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ShoulderCenter, JointType.ShoulderRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ShoulderCenter, JointType.Spine, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.Spine, JointType.HipCenter, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.HipCenter, JointType.HipLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.HipCenter, JointType.HipRight, skelPointsOnly);
 
             // Left Arm
-            this.DrawBone(joints, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.ElbowLeft, JointType.WristLeft, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.WristLeft, JointType.HandLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ShoulderLeft, JointType.ElbowLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ElbowLeft, JointType.WristLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.WristLeft, JointType.HandLeft, skelPointsOnly);
 
             // Right Arm
-            this.DrawBone(joints, drawingContext, JointType.ShoulderRight, JointType.ElbowRight, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.ElbowRight, JointType.WristRight, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.WristRight, JointType.HandRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ShoulderRight, JointType.ElbowRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.ElbowRight, JointType.WristRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.WristRight, JointType.HandRight, skelPointsOnly);
 
             // Left Leg
-            this.DrawBone(joints, drawingContext, JointType.HipLeft, JointType.KneeLeft, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.KneeLeft, JointType.AnkleLeft, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.AnkleLeft, JointType.FootLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.HipLeft, JointType.KneeLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.KneeLeft, JointType.AnkleLeft, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.AnkleLeft, JointType.FootLeft, skelPointsOnly);
 
             // Right Leg
-            this.DrawBone(joints, drawingContext, JointType.HipRight, JointType.KneeRight, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.KneeRight, JointType.AnkleRight, skelPointsOnly);
-            this.DrawBone(joints, drawingContext, JointType.AnkleRight, JointType.FootRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.HipRight, JointType.KneeRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.KneeRight, JointType.AnkleRight, skelPointsOnly);
+            this.DrawBone(joints, drawingContext, trackedBonePen, JointType.AnkleRight, JointType.FootRight, skelPointsOnly);
 
             // Render Joints
             foreach (Joint joint in joints)
@@ -184,49 +199,58 @@ namespace KinectAnywhere
             return jointArr;
         }
 
-        public void drawSkeletons(List<Skeleton> skeletons)
+        public void drawSkeletons(Dictionary<Skeleton, int> camSkeletons)
         {
             using (DrawingContext dc = this.drawingGroup.Open())
             {
-                // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
-                for (int i = 0; i < skeletons.Count; i++)
+                foreach (KeyValuePair<Skeleton, int> entry in camSkeletons)
                 {
-                    RenderClippedEdges(skeletons[i], dc);
+                    int cameraId = entry.Value;
+                    Skeleton skel = entry.Key;
+                    Pen trackedBonePen = trackedBonePens[cameraId];
+
+                    RenderClippedEdges(skel, dc);
 
                     // Draws the skeleton
-                    if (skeletons[i].TrackingState == SkeletonTrackingState.Tracked)
-                        this.DrawBonesAndJoints(convertJointCollToJointArr(skeletons[i].Joints), dc);
-                    else if (skeletons[i].TrackingState == SkeletonTrackingState.PositionOnly)
-                        dc.DrawEllipse(this.centerPointBrush, null, this.SkeletonPointToScreen(skeletons[i].Position), BodyCenterThickness, BodyCenterThickness);
-                    Skeleton sk = skeletons[i];
-                }
+                    if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        this.DrawBonesAndJoints(convertJointCollToJointArr(skel.Joints), dc, trackedBonePen);
+                    else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+                        dc.DrawEllipse(this.centerPointBrush, null, this.SkeletonPointToScreen(skel.Position), BodyCenterThickness, BodyCenterThickness);
 
-                // prevent drawing outside of our render area
-                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                    // prevent drawing outside of our render area
+                    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                }
             }
         }
 
-        public void drawSkeletons(SkelJointsData[] frameData)
+        public void drawSkeletons(Dictionary<SkelJointsData, int> frameData)
         {
-            Joint[] joints = new Joint[frameData[0].joints.Length];
-            for (int i = 0; i < frameData[0].joints.Length; i++)
-            {
-                joints[i] = new Joint();
-                joints[i].Position = frameData[0].joints[i];
-            }
-
             using (DrawingContext dc = this.drawingGroup.Open())
             {
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
-                if (joints.Length != 0)
-                    this.DrawBonesAndJoints(joints, dc, true);
+                foreach (KeyValuePair<SkelJointsData, int> entry in frameData)
+                {
+                    int cameraId = entry.Value;
+                    SkelJointsData skelJointsData = entry.Key;
+                    Pen trackedBonePen = trackedBonePens[cameraId];
 
-                // prevent drawing outside of our render area
-                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                    Joint[] joints = new Joint[skelJointsData.joints.Length];
+                    for (int i = 0; i < skelJointsData.joints.Length; i++)
+                    {
+                        joints[i] = new Joint();
+                        joints[i].Position = skelJointsData.joints[i];
+                    }
+
+                    if (joints.Length != 0)
+                        this.DrawBonesAndJoints(joints, dc, trackedBonePen, true);
+
+                    // prevent drawing outside of our render area
+                    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+                }
             }
         }
     }
