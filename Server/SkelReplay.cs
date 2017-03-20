@@ -55,9 +55,8 @@ namespace KinectAnywhere
             int skelId = cameraFile.ReadInt32();
 
             SkelJointsData jointsData = new SkelJointsData(cameraId, skelId, frameOffset);
-            int numOfJoints = Enum.GetNames(typeof(JointType)).Length;
 
-            for (int i = 0; i < numOfJoints; i++)
+            for (int i = 0; i < SkelJointsData.numOfJoints; i++)
             {
                 byte parsedjointType = cameraFile.ReadByte();
                 float posX = cameraFile.ReadSingle();
