@@ -250,3 +250,16 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+*.cache
+Server/bin/Debug/Kinect-Server.pdb
+*.cache
+Client/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+*.exe
+Server/bin/Debug/Kinect-Server.exe
+*.pdb
+Server/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+*.exe
+Server/obj/Debug/Kinect-Server.pdb
+*.cache
+Server/obj/Debug/Kinect-Server_MarkupCompile.i.cache
+*.Cache
