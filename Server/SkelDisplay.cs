@@ -44,7 +44,7 @@ namespace KinectAnywhere
             }
             else
             {
-                byte[] coordMapperParams = File.ReadAllBytes("Coord_Mapper_Params.txt");
+                byte[] coordMapperParams = File.ReadAllBytes("..\\..\\Coord_Mapper_Params.txt");
                 this.coordinateMapper = new CoordinateMapper(coordMapperParams);
             }
         }
