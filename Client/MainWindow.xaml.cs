@@ -8,7 +8,7 @@
     using System.Net;
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
-
+    using System;
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -73,12 +73,11 @@
                 {
                     this.sensor = null;
                 }
+
+                this.skelDisp = new SkelDisplay(this.sensor);
+                Image.Source = this.skelDisp.imageSource;
             }
-
-            this.skelDisp = new SkelDisplay(this.sensor);
-            Image.Source = this.skelDisp.imageSource;
-
-            if (null == this.sensor)
+            else // (null == this.sensor)
             {
                 this.statusBarText.Text = Microsoft.Samples.Kinect.SkeletonClient.Properties.Resources.NoKinectReady;
             }
@@ -130,6 +129,7 @@
             BinaryFormatter bf = new BinaryFormatter();
 
             bf.Serialize(ms, skeletonsToSend);
+            bf.Serialize(ms, DateTime.Now);
 
             ms.Position = 0;
 
@@ -138,7 +138,11 @@
 
             ms.Close();
 
-            this.skelDisp.drawSkeletons(skeletonsToSend);
+            Dictionary<Skeleton, int> skelsToDraw = new Dictionary<Skeleton, int>();
+            foreach (Skeleton skel in skeletons)
+                skelsToDraw.Add(skel, 0);
+
+            this.skelDisp.drawSkeletons(skelsToDraw);
         }
 
         /// <summary>
