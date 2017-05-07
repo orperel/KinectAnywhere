@@ -60,7 +60,7 @@ namespace KinectAnywhere
         }
 
         /// <summary>
-        /// Updates the position ofa single joint.
+        /// Updates the position of a single joint.
         /// </summary>
         /// <param name="jointType"> The joint type to update </param>
         /// <param name="pos"> The new position of the joint </param>

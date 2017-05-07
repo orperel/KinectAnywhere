@@ -37,13 +37,14 @@ namespace KinectAnywhere
             // Configurable ANN parameters
             int hiddenLayerSize = inputLayerSize * inputLayerSize;
             float learningRate = 0.15f;
+            bool isStochastic = true;
             float momentum = 0.1f;
 
             // Create an ANN for each pair of cameras
             for (int i = 0; i < numOfCameras - 1; i++)
             {
                 _neuralNets[i] = new UnifiedCameraNeuralNetwork(inputLayerSize, hiddenLayerSize, outputLayerSize,
-                                                                learningRate, momentum);
+                                                                learningRate, isStochastic, momentum);
             }
 
             _numOfCameras = numOfCameras;
@@ -78,7 +79,7 @@ namespace KinectAnywhere
         /// <param name="frameData"></param>
         private void processFrame(Dictionary<SkelJointsData, int> frameData)
         {
-            trainNetwork(frameData);
+            //trainNetwork(frameData);
             _display.drawSkeletons(frameData);
         }
 

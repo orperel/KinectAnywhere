@@ -10,17 +10,18 @@
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Diagnostics;
-
+    using System.Windows.Media;
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         // TODO: rmove
-        private DateTime SESSION_TIMESTAMP = DateTime.Parse("22:32:53.330");
-        private int numOfCameras = 1;
+        private DateTime SESSION_TIMESTAMP = DateTime.Parse("22:42:45.887");
+        private int numOfCameras = 3;
         private Calibration calibration;
-        bool isRecord = false;
+        bool isRecord = true;
+        bool isTesting = false;
 
         // TODO: add comments   
         UdpClient Client = new UdpClient(11000);
@@ -56,11 +57,12 @@
 
             if (isFirstConnectionForClient)
             {
-                skeletons[remoteIPString] = skeletonList;
                 int cameraId = cameras.Count; // Assign camera id for client by ip
                 cameras[remoteIPString] = cameraId;
-                this.skelRec.createFile(cameraId); 
+                this.skelRec.createFile(cameraId);
             }
+
+            skeletons[remoteIPString] = skeletonList;
 
             if (this.skelRec != null)
             {
@@ -84,13 +86,20 @@
             this.skelDisp = new SkelDisplay(null);
 
             InitializeComponent();
-            
+
+            // TODO: Delete this
+            if (isTesting)
+                AnnTester.initNeuralNetworkTest();
+
             try
             {
-                if (isRecord)
-                    Client.BeginReceive(new AsyncCallback(recv), null);
-                else
-                    this.calibration = new Calibration(SESSION_TIMESTAMP, numOfCameras, this.skelDisp);
+                if (!isTesting)
+                {
+                    if (isRecord)
+                        Client.BeginReceive(new AsyncCallback(recv), null);
+                    else
+                        this.calibration = new Calibration(SESSION_TIMESTAMP, numOfCameras, this.skelDisp);
+                }
             }
             catch (Exception e)
             {
@@ -115,7 +124,18 @@
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            this.calibration.calibrate();
+            /* Tests. TODO: Delete*/
+            if (isTesting)
+            {
+                DrawingGroup drawingGroup = new DrawingGroup();
+                Image.Source = new DrawingImage(drawingGroup);
+                AnnTester.runNeuralNetworkTest(drawingGroup);
+            }
+            /* --- */
+            else
+            {
+                this.calibration.calibrate();
+            }
         }
 
         /// <summary>
@@ -139,7 +159,7 @@
                 // Timer for showSkeletons
                 this.timer1 = new System.Windows.Forms.Timer();
                 this.timer1.Tick += new EventHandler(timer2_Tick);
-                this.timer1.Interval = 16;
+                this.timer1.Interval = 120;
                 this.timer1.Start();
             }
         }

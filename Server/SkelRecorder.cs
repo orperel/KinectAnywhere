@@ -83,9 +83,9 @@ namespace KinectAnywhere
         {
             // The format of each skeleton recording file:
             // <cameraId>
-            // <timestamp offset> <skelTrackingId>
+            // <skelTrackingId> <timestamp offset>
             // <skel joint id> <joint x,y,z> <skel joint id> <joint x,y,z> ...
-            // <timestamp offset> <skelTrackingId>
+            // <skelTrackingId> <timestamp offset>
             // <skel joint id> <joint x,y,z> <skel joint id> <joint x,y,z> ...
             // ...
 

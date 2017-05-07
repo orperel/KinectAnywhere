@@ -45,14 +45,14 @@ namespace KinectAnywhere
         {
             // The format of each skeleton recording file:
             // <cameraId>
-            // <timestamp offset> <skelTrackingId>
+            // <skelTrackingId> <timestamp offset>
             // <skel joint id> <joint x,y,z> <skel joint id> <joint x,y,z> ...
-            // <timestamp offset> <skelTrackingId>
+            // <skelTrackingId> <timestamp offset>
             // <skel joint id> <joint x,y,z> <skel joint id> <joint x,y,z> ...
             // ...
 
-            uint frameOffset = cameraFile.ReadUInt32();
             int skelId = cameraFile.ReadInt32();
+            uint frameOffset = cameraFile.ReadUInt32();
 
             SkelJointsData jointsData = new SkelJointsData(cameraId, skelId, frameOffset);
 
@@ -93,12 +93,21 @@ namespace KinectAnywhere
                     throw new InvalidOperationException("Camera file #" + cameraId +
                                                         " contains an illegal header: " + parsedCameraId);
 
-                // Read entire camera file to memory
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                try
                 {
-                    SkelJointsData jointsData =
-                        fetchNextSkeletonFromCameraFile(reader, cameraId);
-                    _camRecordedFrames[cameraId].AddLast(jointsData);
+                    // Read entire camera file to memory
+                    while (reader.BaseStream.Position != reader.BaseStream.Length)
+                    {
+                        SkelJointsData jointsData =
+                            fetchNextSkeletonFromCameraFile(reader, cameraId);
+                        _camRecordedFrames[cameraId].AddLast(jointsData);
+                    }
+                }
+                catch (System.IO.EndOfStreamException)
+                {
+                    // This could happen if the recording crashed or a debug session was stopped ungracefully.
+                    // The recording could still be valid so don't crash, we try to replay what we can.
+                    Console.WriteLine("Warning: Recording ended unexpectedly.");
                 }
 
                 reader.Close();
@@ -157,7 +166,7 @@ namespace KinectAnywhere
             Dictionary<SkelJointsData, int> frameData = new Dictionary<SkelJointsData, int>(numOfCameras);
             bool isSynced = true;
 
-            uint minOffset = UInt32.MaxValue;
+            uint maxOffset = UInt32.MinValue;
 
             do // Repeat until all cameras are synced on the same frame
             {
@@ -168,7 +177,12 @@ namespace KinectAnywhere
                     if (_camRecordedFrames[cameraId].First == null)
                         return false; // No frame was replayed
 
-                    minOffset = Math.Min(minOffset, _camRecordedFrames[cameraId].First.Value.frameOffset);
+                    // In some cases the client might start before the server, drain these frames
+                    // to avoid problems with unsigned int maximum
+                    while ((int)_camRecordedFrames[cameraId].First.Value.frameOffset < 0)
+                        _camRecordedFrames[cameraId].RemoveFirst();
+
+                    maxOffset = Math.Max(maxOffset, _camRecordedFrames[cameraId].First.Value.frameOffset);
                 }
 
                 isSynced = true;
@@ -177,15 +191,37 @@ namespace KinectAnywhere
                 // See if we can find a common frame for all cameras.
                 for (int cameraId = 0; cameraId < numOfCameras; cameraId++)
                 {
-                    SkelJointsData camFrameInfo = _camRecordedFrames[cameraId].First.Value;
-                    uint timeOffset = camFrameInfo.frameOffset;
+                    bool isInMinFrame = false;
+                    uint timeOffset = 0;
+                    bool isNotSkipTooFar = false;
 
-                    // Skel recordings must occur within the threshold distance to count as the same frame.
-                    bool isInMinFrame = Math.Abs(timeOffset - minOffset) < FRAME_TIME_THRESHOLD;
+                    do
+                    {
+                        SkelJointsData camFrameInfo = _camRecordedFrames[cameraId].First.Value;
+                        timeOffset = camFrameInfo.frameOffset;
+
+                        // Skel recordings must occur within the threshold distance to count as the same frame.
+                        isInMinFrame = Math.Abs(timeOffset - maxOffset) < FRAME_TIME_THRESHOLD;
+                        isNotSkipTooFar = (timeOffset < FRAME_TIME_THRESHOLD) || 
+                                          (timeOffset - FRAME_TIME_THRESHOLD) < maxOffset;
+
+                        if (!isInMinFrame && isNotSkipTooFar)
+                        {
+                            _camRecordedFrames[cameraId].RemoveFirst();
+
+                            if (_camRecordedFrames[cameraId].First == null)
+                                return false; // No frame was replayed
+                        }
+                    } while (!isInMinFrame && isNotSkipTooFar);
+
                     isSynced = isSynced && isInMinFrame;
+                }
 
-                    if (isInMinFrame)
+                if (isSynced)
+                {
+                    for (int cameraId = 0; cameraId < numOfCameras; cameraId++)
                     { // Capture frame data for current camera and eliminate from recordings list
+                        SkelJointsData camFrameInfo = _camRecordedFrames[cameraId].First.Value;
                         frameData.Add(camFrameInfo, cameraId);
                         _camRecordedFrames[cameraId].RemoveFirst();
                     }

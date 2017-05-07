@@ -57,11 +57,12 @@ namespace KinectAnywhere
 
         /// <summary>
         /// Creates a column vector of size (Length(vals), 1), initialized with vals' values.
+        /// If vals is shorter than the current vector, the first vals.length values are filled.
         /// </summary>
         /// <param name="vals"> Initialization values for the vector </param>
         public void init(float[] vals)
         {
-            if ((cols != 1) || (vals.Length != rows))
+            if ((cols != 1) || (vals.Length > rows))
             {
                 throw new InvalidOperationException("Matrix values initialization failed due to" +
                                                     "non-matching dimensions.");
@@ -80,6 +81,21 @@ namespace KinectAnywhere
                 for (int j = 0; j < cols; j++)
                 {
                     newMat[j, i] = _mat[i, j];
+                }
+            }
+
+            return newMat;
+        }
+
+        public Matrix resize(int newrow, int newcol, float padValue)
+        {
+            Matrix newMat = new Matrix(newrow, newcol);
+
+            for (int i = 0; i < newrow; i++)
+            {
+                for (int j = 0; j < newcol; j++)
+                {
+                    newMat[i, j] = ((i < rows) && (j < cols)) ? _mat[i, j] : padValue;
                 }
             }
 
@@ -113,7 +129,7 @@ namespace KinectAnywhere
 
             for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < cols; j++)
                 {
                     result[i, j] = _mat[i, j] - m2[i, j];
                 }
@@ -247,6 +263,69 @@ namespace KinectAnywhere
             {
                 _mat[i, j] = value;
             }
+        }
+
+        public override bool Equals(System.Object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            // If parameter cannot be cast to Matrix return false.
+            // Also quit if dimensions don't agree
+            Matrix other = obj as Matrix;
+            if (((System.Object)other == null) || (other.rows != this.rows) || (other.cols != this.cols))
+            {
+                return false;
+            }
+
+            // Return true if the values match
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (_mat[i, j] != other._mat[i, j])
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool Equals(Matrix other)
+        {
+            // If parameter is null or dimensions don't agree return false
+            if (((Object)other == null) || (other.rows != this.rows) || (other.cols != this.cols))
+            {
+                return false;
+            }
+
+            // Return true if the values match
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (_mat[i, j] != other._mat[i, j])
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                    hash = hash * 23 + _mat[i, j].GetHashCode();
+            }
+
+            return hash;
         }
     }
 }
